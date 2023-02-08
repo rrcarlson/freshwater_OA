@@ -18,8 +18,9 @@ trim <- trim %>% group_by(dataset_id) %>% mutate(min_time = min(time_utc, na.rm 
                                             max_time = max(time_utc, na.rm = TRUE))
 
 # map the sites
-coords1 <- trim %>% distinct(latitude, longitude, dataset_id)
+coords1 <- trim %>% distinct(latitude, longitude, dataset_id, min_time, max_time)
 mcoords <- st_as_sf(coords1, coords = c("longitude", "latitude"), crs = 4326)
 plot(mcoords$geometry)
 
 
+st_write(m)
