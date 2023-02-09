@@ -17,10 +17,15 @@ trim <- full %>% filter(dataset_id %in% id_list)
 trim <- trim %>% group_by(dataset_id) %>% mutate(min_time = min(time_utc, na.rm = TRUE),
                                             max_time = max(time_utc, na.rm = TRUE))
 
+View(trim %>% group_by(dataset_id) %>% summarize(min_time = min(time_utc, na.rm = TRUE),
+                                         max_time = max(time_utc, na.rm = TRUE)))
+
 # map the sites
 coords1 <- trim %>% distinct(latitude, longitude, dataset_id, min_time, max_time)
 mcoords <- st_as_sf(coords1, coords = c("longitude", "latitude"), crs = 4326)
 plot(mcoords$geometry)
 
+# Calculate distance from shore. Sf isn't working here, so exported to ArcGIS where I ran the "near" tool on all sites.
 
-st_write(m)
+
+
