@@ -54,11 +54,20 @@ st_write(mcoords,"/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/F
 
 # The above seems to be missing a lot - Recalculate time ranges and and plot full data
 full2 <- full2 %>% group_by(dataset_id) %>% mutate(min_time = min(time_utc, na.rm = TRUE),
-                                                   max_time = max(time_utc, na.rm = TRUE)) %>% na.omit()
-coords_full <- full2 %>% distinct(latitude, longitude, dataset_id, min_time, max_time)
-mcoords_full <- st_as_sf(coords_full, coords = c("longitude", "latitude"), crs = 4326)
+                                                   max_time = max(time_utc, na.rm = TRUE))
+coords_full <- full2 %>% distinct(latitude, longitude, dataset_id, min_time, max_time) %>% na.omit()
+# Filter for datasets that are over 3 months (90 days) in time range
+coords_full$time_diff <- coords_full$max_time - coords_full$min_time # Difference between youngest and oldest time
+coords_ts <- coords_full %>% filter(time_diff > 90)
+# Remove CalCOFI (dataset 25) because not nearshore
+coords_ts <- coords_ts %>% filter(dataset_id != 25)
+# Clean up errors in coordinates. There are some crazy values with inconsistent spatial extents that alter final mapping
+coords_ts <- coords_ts %>% filter(latitude < 50)
+coords_ts <- coords_ts %>% filter(longitude > -126)
+  
+mcoords_ts <- st_as_sf(coords_ts, coords = c("longitude", "latitude"), crs = 4326)
 
-st_write(mcoords_full,"/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/planning/all_sites.9Feb2023.shp")
+st_write(mcoords_ts,"/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/planning/all_sites.9Feb2023.shp")
 
 
 
