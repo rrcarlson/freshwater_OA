@@ -69,6 +69,22 @@ mcoords_ts <- st_as_sf(coords_ts, coords = c("longitude", "latitude"), crs = 432
 
 st_write(mcoords_ts,"/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/planning/all_sites.9Feb2023.shp")
 
+# I used a KML of the above to tag all sites located near river mouths. Need to filter sf object to this subset of sites.
+# Will use lat.lon to filter data so first need to remove tailing zeros from lat.lon decimals
+coords_ts$latitude <- sub("0+$", "", as.character(coords_ts$latitude))
+coords_ts$longitude <- sub("0+$", "", as.character(coords_ts$longitude))
+
+# Import sites tagged for river proximity
+fresh <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/planning/sites.csv")
+fresh$Lat <- sub("0+$", "", as.character(fresh$Lat))
+fresh$Lon <- sub("0+$", "", as.character(fresh$Lon))
+coords_ts <- coords_ts %>% rename("Lat" = "latitude", "Lon" = "longitude")
+
+# Join reach, site name, flow, and distance information to relevant sites
+coords_fresh <- coords_ts %>% full_join(fresh, by = c("Lat" = "Lat", "Lon" = "Lon"), multiple = "all")
+
+
+
 
 
 
