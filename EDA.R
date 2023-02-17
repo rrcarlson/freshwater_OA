@@ -83,6 +83,6 @@ full2 <- full2 %>% rename("Lat" = "latitude", "Lon" = "longitude", "Dataset_ID" 
 
 # Join reach, site name, flow, and distance information to relevant sites
 full_fresh <- full2 %>% right_join(fresh, by = c("Lat" = "Lat", "Lon" = "Lon", "Dataset_ID" = "Dataset_ID"), multiple = "all")
-
-
+View(full_fresh %>% filter(Site == "Eel River and Humboldt Bay"))
+full_fresh_pH <- full_fresh %>% filter(!is.na(pH_total))
 
