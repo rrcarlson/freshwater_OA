@@ -84,5 +84,29 @@ full2 <- full2 %>% rename("Lat" = "latitude", "Lon" = "longitude", "Dataset_ID" 
 # Join reach, site name, flow, and distance information to relevant sites
 full_fresh <- full2 %>% right_join(fresh, by = c("Lat" = "Lat", "Lon" = "Lon", "Dataset_ID" = "Dataset_ID"), multiple = "all")
 View(full_fresh %>% filter(Site == "Eel River and Humboldt Bay"))
+
+# Filter by sites with pH measured
 full_fresh_pH <- full_fresh %>% filter(!is.na(pH_total))
+full_fresh_alk <- full_fresh %>% filter(!is.na(ta_umolkg))
+
+# Check whether these sites have alkalinity, temp, salinity as well
+full_fresh_4 <- full_fresh_pH %>% 
+  filter(!is.na(sal_pss)) %>% 
+  filter(!is.na(t_C)) %>% 
+  filter(!is.na(ta_umolkg))
+
+full_fresh_3 <- full_fresh_pH %>% 
+  filter(!is.na(sal_pss)) %>% 
+  filter(!is.na(t_C))
+
+# Filter by sites with complete values for temp and pH to check for upwelling signal (or departures thereof)
+full_fresh_pH_temp <- full_fresh_pH %>% 
+  filter(!is.na(t_C))
+
+# Tally number of observations per Site with temp and pH data
+View(full_fresh_pH_temp %>% group_by(Site) %>% tally())
+View(full_fresh_3 %>% group_by(Site) %>% tally())
+
+
+
 
