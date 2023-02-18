@@ -121,20 +121,20 @@ full_fresh %>%
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
 
-# Santa Barbara Pier
+# Santa Barbara Pier - moderate flow
 # NO clear pattern
 full_fresh %>% 
   filter(Site == "Santa Barbara Pier; Mission Creek and Sycamore Creek") %>% 
   ggplot(aes(x = t_C, y = pH_total)) +
   geom_point()
 
-# strong freshwater - alkalinity pattern
+# some freshwater - alkalinity pattern
 full_fresh %>% 
   filter(Site == "Santa Barbara Pier; Mission Creek and Sycamore Creek") %>% 
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
 
-# Refugio
+# Refugio - very low flow
 # SMALL pattern from upwelling
 full_fresh %>% 
   filter(Site == "Refugio") %>% 
@@ -147,7 +147,7 @@ full_fresh %>%
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
 
-# Morro Bay
+# Morro Bay - medium flow
 # NO distinct pattern
 full_fresh %>% 
   filter(Site == "Morro Bay (Chorro Creek and Los Osos Creek)") %>% 
@@ -167,7 +167,7 @@ full_fresh %>%
   ggplot(aes(x = t_C, y = pH_total)) +
   geom_point()
 
-# NO distinct pattern
+# no real pattern - non-linear (evaluate freshwater signal)
 full_fresh %>% 
   filter(Site == "Goleta") %>% 
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
@@ -185,3 +185,5 @@ full_fresh %>%
   filter(Site == "W of Gaviota SP") %>% 
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
+
+# Use Tomales Bay, Refugio, and SF Bay or Columbia River (if we can find data)
