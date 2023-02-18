@@ -107,6 +107,19 @@ full_fresh_pH_temp <- full_fresh_pH %>%
 View(full_fresh_pH_temp %>% group_by(Site) %>% tally())
 View(full_fresh_3 %>% group_by(Site) %>% tally())
 
+# Plot pH v. temp. Departures should indicate areas where upwelling is not explanatory
+full_fresh_pH_temp %>% 
+  filter(Site == "Tomales Bay") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
+
+full_fresh_3 %>% 
+  filter(Site == "Tomales Bay") %>% 
+  ggplot(aes(x = sal_pss, y = pH_total)) +
+  geom_point()
+
+
+
 
 
 
