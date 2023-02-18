@@ -108,18 +108,80 @@ View(full_fresh_pH_temp %>% group_by(Site) %>% tally())
 View(full_fresh_3 %>% group_by(Site) %>% tally())
 
 # Plot pH v. temp. Departures should indicate areas where upwelling is not explanatory
-full_fresh_pH_temp %>% 
+# Tomales Bay
+# NO clear pattern (upwelling)
+full_fresh %>% 
   filter(Site == "Tomales Bay") %>% 
   ggplot(aes(x = t_C, y = pH_total)) +
   geom_point()
 
-full_fresh_3 %>% 
+# strong freshwater - alkalinity pattern
+full_fresh %>% 
   filter(Site == "Tomales Bay") %>% 
-  ggplot(aes(x = sal_pss, y = pH_total)) +
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
 
+# Santa Barbara Pier
+# NO clear pattern
+full_fresh %>% 
+  filter(Site == "Santa Barbara Pier; Mission Creek and Sycamore Creek") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
 
+# strong freshwater - alkalinity pattern
+full_fresh %>% 
+  filter(Site == "Santa Barbara Pier; Mission Creek and Sycamore Creek") %>% 
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  geom_point()
 
+# Refugio
+# SMALL pattern from upwelling
+full_fresh %>% 
+  filter(Site == "Refugio") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
 
+# Moderate freshwater - alkalinity pattern
+full_fresh %>% 
+  filter(Site == "Refugio") %>% 
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  geom_point()
 
+# Morro Bay
+# NO distinct pattern
+full_fresh %>% 
+  filter(Site == "Morro Bay (Chorro Creek and Los Osos Creek)") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
 
+# alkalinity data not there
+full_fresh %>% 
+  filter(Site == "Morro Bay (Chorro Creek and Los Osos Creek)") %>% 
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  geom_point()
+
+# Goleta - low flow
+# NO distinct pattern
+full_fresh %>% 
+  filter(Site == "Goleta") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
+
+# NO distinct pattern
+full_fresh %>% 
+  filter(Site == "Goleta") %>% 
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  geom_point()
+
+# W of Gaviota SP - very low flow
+# NO distinct pattern
+full_fresh %>% 
+  filter(Site == "W of Gaviota SP") %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
+
+# small salinity - alkalinity trend
+full_fresh %>% 
+  filter(Site == "W of Gaviota SP") %>% 
+  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  geom_point()
