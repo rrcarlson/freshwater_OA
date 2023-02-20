@@ -187,3 +187,19 @@ full_fresh %>%
   geom_point()
 
 # Use Tomales Bay, Refugio, and SF Bay or Columbia River (if we can find data)
+
+# Add SF Bay to the mix. There are a TON of SF Bay sites so need to filter by lat/lon
+SF_Bay$Lat <- as.numeric(SF_Bay$Lat)
+SF_Bay$Lon <- as.numeric(SF_Bay$Lon)
+SF_Bay <- full2[(full2$Lat >= 37.4 & full2$Lat <= 38.2705 & full2$Lon <= -122.515255 & full2$Lon >= -121.704),]
+
+# Try plotting temp and pH for SF Bay - there is no pH or TA data, only temp and salinity
+SF_Bay %>% 
+  ggplot(aes(x = t_C, y = pH_total)) +
+  geom_point()
+
+sum(is.na(SF_Bay$ta_umolkg)) # Confirmed - NA values for TA (and pH) for the entire SF Bay dataset
+
+
+
+
