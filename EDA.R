@@ -202,25 +202,144 @@ full_fresh %>%
 # small salinity - alkalinity trend
 full_fresh %>% 
   filter(Site == "Columbia River") %>% 
-  ggplot(aes(x = sal_pss, y = ta_umolkg)) +
+  ggplot(aes(x = t_C, y = pH_total)) +
   geom_point()
 
 # Tester
 
 full_fresh %>% 
-  filter(Site == "Ventura; Ventura River") %>% 
+  filter(Site == "Umpqua River") %>% 
   ggplot(aes(x = t_C, y = pH_total)) +
   geom_point()
 
 # small salinity - alkalinity trend
 full_fresh %>% 
-  filter(Site == "Ventura; Ventura River") %>% 
+  filter(Site == "Rogue River" | Site == "Umpqua River" | Site == "Neskowin Creek" | Site == "Tillamook Bay; Heitmiller Creek; Watseco Creek") %>% 
   ggplot(aes(x = sal_pss, y = ta_umolkg)) +
   geom_point()
 
 # Use Tomales Bay, Refugio, and Columbia River
-# Other compelling cases: Umpqua River, Neskowin Creek, Rogue River, Tillamook Bay (Heitmiller Creek; Watseco Creek), Stillwater Cove (Stockhoff Creek), San Vicente Creek
+# Other compelling cases: Umpqua River, Neskowin Creek, Rogue River, Tillamook Bay; Heitmiller Creek; Watseco Creek, Stillwater Cove (Stockhoff Creek), San Vicente Creek
 # Ventura has the opposite pattern (inverse TA/salinity), but barely
+
+###### Add stream gauge data where possible
+
+### Tomales Bay
+# Tomales Bay - determine relevant dates
+Tomales <- full_fresh %>% filter(Site == "Tomales Bay")
+# Min time = 2012-10-16 18:17:00
+# Max time = 2019-07-25 22:24:00
+
+# Consolidate Tomales Bay OA data by date
+Tomales$date <- as.Date(Tomales$time_utc)
+Tomales_cond <- Tomales %>% group_by(date) %>% summarize(pH_daily = mean(pH_total, na.rm = TRUE),
+                                                      temp_daily = mean(t_C, na.rm = TRUE),
+                                                      alk_daily = mean(ta_umolkg, na.rm = TRUE),
+                                                      sal_daily = mean(sal_pss, na.rm = TRUE))
+# Match stream gauge data by date
+Tomales_stream <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/TomalesBay_USGS.csv")
+Tomales_stream$date <- mdy(Tomales_stream$datetime)
+Tomales_cond <- Tomales_cond %>% left_join(Tomales_stream, by = "date")
+
+Tomales_cond %>% ggplot(aes(x = discharge_cfs, y = alk_daily)) + geom_point() + xlim(0, 500) + geom_smooth(method = "lm")
+
+### Columbia River
+ColumbiaR <- full_fresh %>% filter(Site == "Columbia River")
+# Min time = 2010-09-07 07:00:00
+# Max time = 2015-05-06 07:00:00
+ColumbiaR$date <- as.Date(ColumbiaR$time_utc)
+View(ColumbiaR[,c("date", "time_utc")])
+Columbia_cond <- ColumbiaR %>% group_by(date) %>% summarize(pH_daily = mean(pH_total, na.rm = TRUE),
+                                                            temp_daily = mean(t_C, na.rm = TRUE),
+                                                            alk_daily = mean(ta_umolkg, na.rm = TRUE),
+                                                            sal_daily = mean(sal_pss, na.rm = TRUE)) %>% na.omit()
+# Match Columbia River dataset to stream gauge data
+Columbia_stream <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/ColumbiaRiver_USGS.csv")
+Columbia_stream$date <- mdy(Columbia_stream$datetime)
+Columbia_cond <- Columbia_cond %>% left_join(Columbia_stream, by = "date")
+
+Columbia_cond %>% ggplot(aes(x = discharge_cfs, y = alk_daily)) + geom_point() + ylim(0, 2250)
+
+### Rogue, Umpqua, Neskowin, Tillamook
+Rogue <- full_fresh %>% filter(Site == "Rogue River")
+# Min time = 2010-09-02 07:00:00
+# Max time = 2015-05-08 07:00:00
+Rogue$date <- as.Date(Rogue$time_utc)
+View(Rogue[,c("date", "time_utc")])
+Rogue_cond <- Rogue %>% group_by(date) %>% summarize(pH_daily = mean(pH_total, na.rm = TRUE),
+                                                     temp_daily = mean(t_C, na.rm = TRUE),
+                                                     alk_daily = mean(ta_umolkg, na.rm = TRUE),
+                                                     sal_daily = mean(sal_pss, na.rm = TRUE)) %>% na.omit()
+# Match Columbia River dataset to stream gauge data
+Rogue_stream <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/Rogue_USGS.csv")
+Rogue_stream$date <- mdy(Rogue_stream$datetime)
+Rogue_cond <- Rogue_cond %>% left_join(Rogue_stream, by = "date")
+
+Rogue_cond %>% ggplot(aes(x = discharge_cfs, y = alk_daily)) + geom_point() + geom_smooth(method = "lm")
+
+### Rogue, Umpqua, Neskowin, Tillamook
+Umpqua <- full_fresh %>% filter(Site == "Umpqua River")
+# Min time = 2010-09-02 07:00:00
+# Max time = 2015-05-08 07:00:00
+Umpqua$date <- as.Date(Umpqua$time_utc)
+View(Umpqua[,c("date", "time_utc")])
+Umpqua_cond <- Umpqua %>% group_by(date) %>% summarize(pH_daily = mean(pH_total, na.rm = TRUE),
+                                                     temp_daily = mean(t_C, na.rm = TRUE),
+                                                     alk_daily = mean(ta_umolkg, na.rm = TRUE),
+                                                     sal_daily = mean(sal_pss, na.rm = TRUE)) %>% na.omit()
+# Match Columbia River dataset to stream gauge data
+Umpqua_stream <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/Umpqua_USGS.csv")
+Umpqua_stream$date <- mdy(Umpqua_stream$datetime)
+Umpqua_cond <- Umpqua_cond %>% left_join(Umpqua_stream, by = "date")
+
+Umpqua_cond %>% ggplot(aes(x = discharge_cfs, y = alk_daily)) + geom_point() + geom_smooth(method = "lm")
+
+### Rogue, Umpqua, Neskowin, Tillamook
+Tillamook <- full_fresh %>% filter(Site == "Tillamook Bay; Heitmiller Creek; Watseco Creek")
+# Min time = 2010-09-02 07:00:00
+# Max time = 2015-05-08 07:00:00
+Tillamook$date <- as.Date(Tillamook$time_utc)
+View(Tillamook[,c("date", "time_utc")])
+Tillamook_cond <- Tillamook %>% group_by(date) %>% summarize(pH_daily = mean(pH_total, na.rm = TRUE),
+                                                       temp_daily = mean(t_C, na.rm = TRUE),
+                                                       alk_daily = mean(ta_umolkg, na.rm = TRUE),
+                                                       sal_daily = mean(sal_pss, na.rm = TRUE)) %>% na.omit()
+# Match Columbia River dataset to stream gauge data
+Tillamook_stream1 <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/Tillamook.Trask_USGS.csv")
+Tillamook_stream1$date <- mdy(Tillamook_stream1$datetime)
+Tillamook_stream1 <- Tillamook_stream1 %>% dplyr::select(c(site_no, date, discharge_cfs))
+Tillamook_cond <- Tillamook_cond %>% left_join(Tillamook_stream1, by = "date")
+
+Tillamook_stream2 <- read.csv("/Users/rachelcarlson/Documents/Research/Postdoc-2022-present/Freshwater_time/Data/flow/Tillamook.Wilson_USGS.csv")
+Tillamook_stream2$date <- mdy(Tillamook_stream2$datetime)
+Tillamook_stream2 <- Tillamook_stream2 %>% dplyr::select(c(site_no, date, discharge_cfs))
+Tillamook_cond <- Tillamook_cond %>% left_join(Tillamook_stream2, by = "date")
+
+Tillamook_cond$discharge_cfs <- Tillamook_cond$discharge_cfs.x  + Tillamook_cond$discharge_cfs.y
+
+Tillamook_cond %>% ggplot(aes(x = discharge_cfs, y = alk_daily)) + geom_point() + geom_smooth(method = "lm")
+
+
+### Combine all rivers above to view pattern
+Till_bind <- Tillamook_cond %>% dplyr::select(c(date, pH_daily, temp_daily, alk_daily, sal_daily, discharge_cfs))
+Till_bind$Site <- "Tillamook"
+Rogue_bind <- Rogue_cond %>% dplyr::select(c(date, pH_daily, temp_daily, alk_daily, sal_daily, discharge_cfs))
+Rogue_bind$Site <- "Rogue"
+Umpqua_bind <- Umpqua_cond %>% dplyr::select(c(date, pH_daily, temp_daily, alk_daily, sal_daily, discharge_cfs))
+Umpqua_bind$Site <- "Umpqua"
+
+NW <- do.call("rbind", list(Till_bind, Rogue_bind, Umpqua_bind))
+NW %>% ggplot(aes(x = discharge_cfs, y = alk_daily, group = Site)) + geom_point(aes(col = Site)) + geom_smooth(aes(color = Site), method = "lm")
+
+
+
+
+
+
+
+
+
+
 
 # Add SF Bay to the mix. There are a TON of SF Bay sites so need to filter by lat/lon
 SF_Bay$Lat <- as.numeric(SF_Bay$Lat)
