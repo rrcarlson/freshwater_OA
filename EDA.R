@@ -156,7 +156,6 @@ oas$soilpH_hucMean <- rescale(oas$soilpH_hucMean)
 oas$soilpH_hucMax <- rescale(oas$soilpH_hucMax)
 oas$upwell <- rescale(oas$upwell)
 oas$upwellN <- rescale(oas$upwellN)
-oas$lat <- rescale(oas$lat)
 oas$seaSal <- rescale(oas$seaSal)
 oas$distanceRiv <- rescale(oas$distanceRiv)
 oas$distanceSho <- rescale(sqrt(oas$distanceSho))
@@ -193,8 +192,9 @@ bwplot(seaTA~fYear | dataset_id, data=oas, xlab = "Year")
 # -----------------------------------------------------------------------------
 # Basic linear model examining relationships between ocean TA and predictors
 # Includes interaction between salinity and soil pH (watershed influence)
+# Now includes spatial eigenvectors to account for spatial autocorrelation
 
-foo <- lm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + month + year, data = oas)
+foo <- lm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + month + year + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10, data = oas)
 plot(foo)
 
 # My hunch is that TA and Salinity are positively related (this is a well known relationship) but that there is lower than expected SeaTA near watersheds with low soil pH. The last part would be our main finding.
@@ -205,9 +205,10 @@ plot(foo)
 # -----------------------------------------------------------------------------
 # Gamma regression is appropriate for positive continuous response variables
 # with right-skewed distributions (like Total Alkalinity)
+# Now includes spatial eigenvectors to account for spatial autocorrelation
 
 # Fit gamma GLM with log link (common choice for gamma models)
-glm.gamma <- glm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + depth_bin,
+glm.gamma <- glm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + depth_bin + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10,
                  data = oas, 
                  family = Gamma(link = "log"))
 
@@ -215,7 +216,7 @@ glm.gamma <- glm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + s
 summary(glm.gamma)
 
 # Alternative: gamma with inverse link (for comparison)
-glm.gamma.inv <- glm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + depth_bin,
+glm.gamma.inv <- glm(seaTA ~ seaSal*soilpH_hucMax + upwell + composite_fw_expose + state + depth_bin + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10,
                      data = oas, 
                      family = Gamma(link = "inverse"))
 
@@ -271,6 +272,28 @@ oas_sf <- st_transform(oas_sf, 5070)
 # Moran's I test
 moran.test(deviance_resid, lw, zero.policy = TRUE)
 
+# Compute spatial eigenvectors to account for spatial autocorrelation
+# Use the full dataset for eigenvectors
+coords_full <- st_coordinates(oas_sf)
+nb_full <- dnearneigh(coords_full, d1 = 0, d2 = 10000)
+lw_full <- nb2listw(nb_full, style = "W", zero.policy = TRUE)
+
+# Compute eigenvectors
+W_full <- listw2mat(lw_full)
+eigen_decomp <- eigen(W_full)
+
+# Select eigenvectors with positive eigenvalues
+ME <- eigen_decomp$vectors[, eigen_decomp$values > 1e-6]
+
+# Select first 10 eigenvectors
+n_eigen <- min(10, ncol(ME))
+ME_selected <- ME[, 1:n_eigen]
+
+# Add to data frame
+for (i in 1:n_eigen) {
+  oas[[paste0("ME", i)]] <- ME_selected[, i]
+}
+
 # Test 4: Variogram at different lags (alternative spatial test)
 variogram_resid <- variogram(deviance_resid ~ 1, locations = ~longitude + latitude, data = oas)
 plot(variogram_resid, main = "Variogram of residuals")
@@ -295,20 +318,21 @@ BIC(glm.gamma, glm.gamma.inv)
 # -----------------------------------------------------------------------------
 # GAMs allow for non-linear relationships between predictors and response
 # Using the same variable names as the LM and GLM models above
+# Now includes spatial eigenvectors to account for spatial autocorrelation
 
 # GAM model 1: Total alkalinity as response (using same variables as LM/GLM)
 gam.m1 <- gam(seaTA ~ s(distanceRiv) + s(composite_fw_expose) + s(soilpH_hucMax) + 
-              s(upwell) + s(month) + s(year) + state,
+              s(upwell) + s(month) + s(year) + state + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10,
               data = oas, family = gaussian, method = "REML")
 
 # GAM model 2: Alternative specification with reduced smooth terms
 gam.m2 <- gam(seaTA ~ s(seaSal) + s(soilpH_hucMax) + s(upwell) + s(composite_fw_expose) + 
-              state + month + year,
+              state + month + year + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10,
               data = oas, family = gaussian, method = "REML")
 
 # GAM model 3: Interaction between salinity and soil pH (by state)
 gam.m3 <- gam(seaTA ~ te(seaSal, soilpH_hucMax) + s(composite_fw_expose) + 
-              upwell + state + s(month, bs = "cc") + s(year),
+              upwell + state + s(month, bs = "cc") + s(year) + ME1 + ME2 + ME3 + ME4 + ME5 + ME6 + ME7 + ME8 + ME9 + ME10,
               data = oas, family = gaussian, method = "REML")
 
 # -----------------------------------------------------------------------------
